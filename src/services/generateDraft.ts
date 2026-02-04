@@ -14,7 +14,7 @@ export async function generateDraft(rawStories: string) {
 
   try {
     const currentDate = new Date().toLocaleDateString();
-    const header = `🚀 AI and LLM Trends on X for ${currentDate}\n\n`;
+    const header = `🚀 Single Board Computer on Web and X for ${currentDate}\n\n`;
 
     // Determine which API to use based on available API keys
     const useOpenAI = !!process.env.OPENAI_API_KEY;

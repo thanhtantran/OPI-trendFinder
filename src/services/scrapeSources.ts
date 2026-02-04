@@ -19,7 +19,7 @@ const StorySchema = z.object({
 const StoriesSchema = z.object({
   stories: z
     .array(StorySchema)
-    .describe("A list of today's AI or LLM-related stories"),
+    .describe("A list of today's Single Board Computer-related stories"),
 });
 
 // Define the TypeScript type for a story using the schema
@@ -96,7 +96,7 @@ export async function scrapeSources(
       if (useScrape) {
         const currentDate = new Date().toLocaleDateString();
         const promptForFirecrawl = `
-Return only today's AI or LLM related story or post headlines and links in JSON format from the page content. 
+Return only today's Single Board Computer related story or post headlines and links in JSON format from the page content. 
 They must be posted today, ${currentDate}. The format should be:
 {
   "stories": [
@@ -108,7 +108,7 @@ They must be posted today, ${currentDate}. The format should be:
     ...
   ]
 }
-If there are no AI or LLM stories from today, return {"stories": []}.
+If there are no Single Board Computer stories from today, return {"stories": []}.
 
 The source link is ${source}. 
 If a story link is not absolute, prepend ${source} to make it absolute. 
