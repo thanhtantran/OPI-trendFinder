@@ -16,10 +16,13 @@ export async function generateDraft(rawStories: string) {
     const currentDate = new Date().toLocaleDateString();
     const header = `🚀 AI and LLM Trends on X for ${currentDate}\n\n`;
 
-    // Instantiate the OpenAI client using your OPENAI_API_KEY
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
+    // Determine which API to use based on available API keys
+    const useOpenAI = !!process.env.OPENAI_API_KEY;
+    const useDeepseek = !!process.env.DEEPSEEK_API_KEY && !useOpenAI;
+
+    if (!useOpenAI && !useDeepseek) {
+      throw new Error("No API keys found. Please provide either OPENAI_API_KEY or DEEPSEEK_API_KEY in your .env file.");
+    }
 
     // Prepare messages with explicit literal types
     const messages: Array<{ role: "system" | "user"; content: string }> = [
@@ -36,22 +39,53 @@ export async function generateDraft(rawStories: string) {
       },
     ];
 
-    // Call the chat completions API using the o3-mini model
-    const completion = await openai.chat.completions.create({
-      model: "o3-mini",
-      reasoning_effort: "medium",
-      messages,
-      store: true,
-    });
+    let rawJSON;
 
-    const rawJSON = completion.choices[0].message.content;
+    if (useOpenAI) {
+      console.log("Using OpenAI API...");
+      // Instantiate the OpenAI client using your OPENAI_API_KEY
+      const openai = new OpenAI({
+		baseURL: 'https://api.openai.com',
+        apiKey: process.env.OPENAI_API_KEY,
+      });
+
+      // Call the OpenAI chat completions API
+      const completion = await openai.chat.completions.create({
+        model: "gpt-3.5-turbo", // or your preferred model
+        messages,
+      });
+
+      rawJSON = completion.choices[0].message.content;
+    } else {
+      console.log("Using Deepseek API...");
+      // Instantiate the OpenAI client using your DEEPSEEK_API_KEY
+      const deepseek = new OpenAI({
+		baseURL: 'https://api.deepseek.com',
+        apiKey: process.env.DEEPSEEK_API_KEY,
+      });
+
+      // Call the Deepseek chat completions API
+      const completion = await deepseek.chat.completions.create({
+        model: "deepseek-chat",
+        messages,
+      });
+
+      rawJSON = completion.choices[0].message.content;
+    }
+
     if (!rawJSON) {
-      console.log("No JSON output returned from OpenAI.");
+      console.log("No JSON output returned from API.");
       return header + "No output.";
     }
     console.log(rawJSON);
+	
+    // Clean up the JSON string by removing markdown code block formatting
+    const cleanJSON = rawJSON
+      .replace(/```json\s*/g, '') // Remove ```json
+      .replace(/```\s*$/g, '')    // Remove trailing ```
+      .trim();                    // Trim any extra whitespace	
 
-    const parsedResponse = JSON.parse(rawJSON);
+    const parsedResponse = JSON.parse(cleanJSON);
 
     // Check for either key and see if we have any content
     const contentArray =

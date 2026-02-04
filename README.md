@@ -115,20 +115,17 @@ DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/WEBHOOK/URL
    docker build -t trend-finder .
    ```
 
-2. **Run the Docker container:**
+2. **Run and Stop the Docker container using docker run**
    ```bash
-   docker run -d -p 3000:3000 --env-file .env trend-finder
+   docker run --name trend-finder -p 3000:3000 --env-file .env trend-finder
+   # Stop
+   docker stop trend-finder && docker container rm trend-finder
    ```
 
-## Using Docker Compose
-
-1. **Start the application with Docker Compose:**
+3. **Start and Stop the application with Docker Compose:**
    ```bash
-   docker-compose up --build -d
-   ```
-
-2. **Stop the application with Docker Compose:**
-   ```bash
+   docker-compose up -d
+   # Stop
    docker-compose down
    ```
 
